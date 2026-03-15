@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Activity Heatmap</title>
-    <link rel="shortcut icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiYxPRxxUXFchYiRdK26Bvplunq3Nx7c5xMw&s" type="image/x-icon">
-
+  <link rel="shortcut icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiYxPRxxUXFchYiRdK26Bvplunq3Nx7c5xMw&s" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -697,7 +695,7 @@
     <div class="performance-metric">
       <span class="performance-label">Target Window</span>
       <span class="performance-value" id="performance-total-days">0</span>
-      <span class="performance-subtext">11 March to 20 June</span>
+      <span class="performance-subtext">16 March to 30 June</span>
     </div>
   </div>
 
@@ -768,8 +766,8 @@
   const today     = startOfDay(new Date());
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
-  const RANGE_START = new Date(today.getFullYear(), 2, 11);
-  const RANGE_END   = new Date(today.getFullYear(), 5, 20);
+  const RANGE_START = new Date(today.getFullYear(), 2, 16);
+  const RANGE_END   = new Date(today.getFullYear(), 5, 30);
 
   document.getElementById('today-heading-date').textContent = `Today: ${formatDisplayDate(today)}`;
   document.getElementById('date-range-label').innerHTML =
@@ -1346,8 +1344,6 @@
   })();
 </script>
 </body>
-
 </html>
-
 
 
