@@ -3,732 +3,388 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Activity Heatmap</title>
+  <title>Discipline — Activity Tracker</title>
   <link rel="shortcut icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiYxPRxxUXFchYiRdK26Bvplunq3Nx7c5xMw&s" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    /* ── LeetCode exact palette ── */
     :root {
-      --bg:           #000000;        /* pure black page bg */
-      --surface:      #1a1a1a;        /* card / panel bg */
-      --surface2:     #282828;        /* slightly lighter surface */
-      --border:       #3a3a3a;        /* subtle border */
-      --text:         #eff1f6;        /* primary text */
-      --muted:        #6c6c6c;        /* secondary / dim text */
-      --orange:       #ffa116;        /* LeetCode signature orange */
-      --orange-dim:   #c47e0d;        /* darker orange hover */
-      --green:        #00b8a3;        /* LeetCode easy green */
-      --yellow:       #ffc01e;        /* LeetCode medium yellow */
-      --blue:         #3b82f6;        /* LeetCode hard blue */
-      --today:        #00c853;        /* today = bright green */
-      --yesterday:    #117830;        /* yesterday = teal-green */
-      --lit:          #dd891c;        /* lit = GitHub green */
-      --day-bg:       #282828;        /* default in-range day */
-      --day-oor:      #141414;        /* out-of-range day */
+      --bg: #000000; --surface: #111111; --surface2: #1c1c1c; --surface3: #252525;
+      --border: #2e2e2e; --text: #eff1f6; --muted: #5a5a5a; --muted2: #888;
+      --orange: #ffa116; --yellow: #ffc01e; --green: #00c853; --green-dim: #117830;
+      --lit: #dd891c; --lit2: #f5a623; --today: #00c853; --yesterday: #117830;
+      --day-bg: #1c1c1c; --day-oor: #0d0d0d; --streak-color: #ff6b35; --blue: #3b82f6; --purple: #8b5cf6;
     }
-
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      overflow-x: hidden;
+      background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px 80px; overflow-x: hidden;
     }
-
-    .container {
-      position: relative;
-      width: 100%;
-      max-width: 980px;
-    }
-
-    /* ── Header ── */
-    header {
-      margin-bottom: 44px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-    }
-
-    .header-text {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    /* ── Analog Clock ── */
-    .clock-wrap {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    #analog-clock {
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: 0 0 0 4px var(--surface2), 0 0 24px rgba(0,200,83,0.15);
-      display: block;
-    }
-
-    .clock-time-label {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.14em;
-      font-family: 'DM Mono', monospace;
-    }
-
-    .label {
-      font-size: 11px;
-      letter-spacing: 0.22em;
-      color: var(--orange);
-      text-transform: uppercase;
-    }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      font-weight: 900;
-      color: var(--text);
-      line-height: 1.05;
-    }
-
+    .container { position: relative; width: 100%; max-width: 1000px; z-index: 1; }
+    header { margin-bottom: 36px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    .header-text { display: flex; flex-direction: column; gap: 6px; }
+    .label { font-size: 11px; letter-spacing: 0.22em; color: var(--orange); text-transform: uppercase; }
+    h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem,5vw,3rem); font-weight: 900; color: var(--text); line-height: 1.05; }
     h1 span { color: var(--orange); }
+    .heading-date { font-size: 13px; color: var(--text); letter-spacing: 0.08em; text-transform: uppercase; }
+    .subtitle { font-size: 12px; color: var(--muted2); margin-top: 4px; }
+    .clock-wrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    #analog-clock { border-radius: 50%; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 0 0 4px var(--surface2), 0 0 24px rgba(0,200,83,0.15); display: block; }
+    .clock-time-label { font-size: 11px; color: var(--muted); letter-spacing: 0.14em; }
 
-    .heading-date {
-      font-size: 13px;
-      color: var(--text);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
+    /* Habit Tabs */
+    .habit-tabs-wrapper { margin-bottom: 24px; }
+    .habit-tabs-label { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+    .habit-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .habit-tab { display: flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--muted2); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.18s ease; user-select: none; }
+    .habit-tab:hover { border-color: var(--muted); color: var(--text); }
+    .habit-tab.active { border-color: var(--orange); color: var(--text); background: var(--surface2); box-shadow: 0 0 12px rgba(255,161,22,0.15); }
+    .habit-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .add-habit-btn { padding: 8px 14px; border-radius: 6px; border: 1px dashed var(--border); background: transparent; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.18s ease; }
+    .add-habit-btn:hover { border-color: var(--orange); color: var(--orange); }
 
-    .subtitle {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
+    /* Quote */
+    .quote-block { margin-bottom: 24px; padding: 18px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; position: relative; overflow: hidden; }
+    .quote-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange) 0%, transparent 70%); border-radius: 8px 8px 0 0; }
+    .quote-mark { font-family: 'Playfair Display', serif; font-size: 48px; line-height: 1; color: var(--orange); opacity: 0.2; position: absolute; top: 8px; left: 18px; user-select: none; }
+    .quote-text { font-family: 'Playfair Display', serif; font-size: clamp(0.9rem,2.2vw,1.1rem); font-style: italic; color: var(--text); line-height: 1.65; padding-left: 28px; }
+    .quote-author { font-size: 11px; color: var(--orange); margin-top: 10px; padding-left: 28px; letter-spacing: 0.1em; }
 
-    /* ── Month blocks ── */
-    .months-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
+    /* Weekly Summary */
+    .weekly-summary { margin-bottom: 24px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.18s; }
+    .weekly-summary:hover { border-color: var(--orange); }
+    .weekly-summary::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+    .weekly-summary-left { display: flex; flex-direction: column; gap: 4px; }
+    .weekly-summary-title { font-size: 11px; color: var(--muted2); letter-spacing: 0.1em; }
+    .weekly-summary-value { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); }
+    .weekly-summary-right { font-size: 11px; color: var(--orange); white-space: nowrap; }
+    .week-dots { display: flex; gap: 5px; margin-top: 6px; }
+    .week-dot { width: 18px; height: 18px; border-radius: 4px; background: var(--surface2); border: 1px solid var(--border); }
+    .week-dot.active { background: var(--orange); border-color: var(--orange); }
+    .week-dot.today-dot { border-color: var(--green); box-shadow: 0 0 6px var(--green); }
 
-    .month-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 22px 26px 26px;
-      position: relative;
-    }
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; position: relative; overflow: hidden; transition: border-color 0.18s; }
+    .stat-card:hover { border-color: var(--muted); }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 8px 8px 0 0; }
+    .stat-card.perf::before { background: linear-gradient(90deg, var(--green), transparent 70%); }
+    .stat-card.streak::before { background: linear-gradient(90deg, var(--streak-color), transparent 70%); }
+    .stat-card.best::before { background: linear-gradient(90deg, var(--lit), transparent 70%); }
+    .stat-card.target::before { background: linear-gradient(90deg, var(--blue), transparent 70%); }
+    .stat-card.forecast::before { background: linear-gradient(90deg, var(--purple), transparent 70%); }
+    .stat-label { font-size: 9px; color: var(--muted); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: clamp(1.1rem,2.5vw,1.8rem); color: var(--text); line-height: 1; margin-bottom: 4px; }
+    .stat-sub { font-size: 10px; color: var(--muted2); letter-spacing: 0.04em; }
+    .stat-sub.orange { color: var(--orange); }
+    .stat-sub.streak-col { color: var(--streak-color); }
+    .stat-sub.purple { color: var(--purple); }
+    .streak-icon { font-size: 18px; position: absolute; top: 14px; right: 14px; }
+    .forecast-bar { height: 4px; background: var(--surface3); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+    .forecast-fill { height: 100%; background: linear-gradient(90deg, var(--purple), #a78bfa); border-radius: 99px; transition: width 0.6s ease; }
 
-    .month-block::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--orange) 0%, transparent 70%);
-      border-radius: 8px 8px 0 0;
-    }
+    /* Progress Bar */
+    .progress-bar-wrap { margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; position: relative; overflow: hidden; }
+    .progress-bar-wrap::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange) 0%, var(--yellow) 100%); }
+    .progress-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .progress-bar-title { font-size: 11px; color: var(--muted2); letter-spacing: 0.1em; }
+    .progress-bar-pct { font-size: 11px; color: var(--orange); }
+    .progress-bar-track { height: 6px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--orange), var(--yellow)); transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+    .progress-milestones { display: flex; justify-content: space-between; margin-top: 8px; }
+    .milestone { font-size: 9px; color: var(--muted); letter-spacing: 0.08em; }
+    .milestone.reached { color: var(--orange); }
 
-    .month-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    /* Intensity */
+    .intensity-selector { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+    .intensity-label { font-size: 11px; color: var(--muted2); margin-right: 8px; white-space: nowrap; }
+    .intensity-btn { width: 28px; height: 28px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.14s ease; font-size: 10px; color: var(--muted); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; }
+    .intensity-btn:hover { border-color: var(--orange); color: var(--text); }
+    .intensity-btn.selected { background: var(--orange); color: #000; border-color: var(--orange); font-weight: 700; }
+    .intensity-desc { font-size: 11px; color: var(--muted); margin-left: 8px; flex: 1; }
 
-    .month-title .year-tag {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      font-weight: 400;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: var(--surface2);
-    }
+    /* Calendar */
+    .months-wrapper { display: flex; flex-direction: column; gap: 24px; }
+    .month-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px 26px; position: relative; }
+    .month-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange) 0%, transparent 70%); border-radius: 8px 8px 0 0; }
+    .month-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .month-title .year-tag { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400; color: var(--muted); border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px; background: var(--surface2); }
+    .month-lit-count { font-family: 'DM Mono', monospace; font-size: 10px; margin-left: auto; }
+    .weekdays { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; margin-bottom: 7px; }
+    .wd { text-align: center; font-size: 10px; color: var(--muted); letter-spacing: 0.06em; padding: 3px 0; }
+    .days-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; }
+    .day { aspect-ratio: 1; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; cursor: default; position: relative; transition: box-shadow 0.14s ease, transform 0.1s ease; user-select: none; }
+    .day:hover { transform: scale(1.08); z-index: 5; }
+    .day.empty { background: transparent; cursor: default; }
+    .day.empty:hover { transform: none; }
+    .day.out-range { background: var(--day-oor); color: var(--muted); opacity: 0.3; }
+    .day.out-range:hover { transform: none; }
+    .day.in-range { background: var(--day-bg); color: var(--muted); }
+    .day.is-today { background: var(--today); color: #000; font-weight: 700; cursor: pointer; }
+    .day.is-yesterday { background: var(--yesterday); color: #fff; font-weight: 600; cursor: pointer; }
+    .day.lit-1 { background: #3d2a00 !important; color: #ffa116 !important; font-weight: 600 !important; cursor: pointer !important; }
+    .day.lit-2 { background: #6b3d00 !important; color: #000 !important; font-weight: 700 !important; cursor: pointer !important; }
+    .day.lit-3 { background: #c47e0d !important; color: #000 !important; font-weight: 700 !important; cursor: pointer !important; box-shadow: 0 0 6px rgba(196,126,13,0.5); }
+    .day.lit-4 { background: #ffa116 !important; color: #000 !important; font-weight: 700 !important; cursor: pointer !important; box-shadow: 0 0 10px rgba(255,161,22,0.6); }
+    .day.lit-5 { background: #ffc01e !important; color: #000 !important; font-weight: 700 !important; cursor: pointer !important; box-shadow: 0 0 14px rgba(255,192,30,0.8); animation: pulse-max 2s ease-in-out infinite; }
+    @keyframes pulse-max { 0%,100% { box-shadow: 0 0 10px rgba(255,192,30,0.7); } 50% { box-shadow: 0 0 22px rgba(255,192,30,1); } }
+    .day.has-note::before { content: '·'; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 14px; color: rgba(0,0,0,0.5); line-height: 1; }
 
-    /* ── Weekday header ── */
-    .weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 7px;
-    }
+    /* Legend */
+    .legend { margin-top: 28px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+    .legend-text { font-size: 10px; color: var(--muted); margin-right: 10px; }
 
-    .wd {
-      text-align: center;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      padding: 3px 0;
-    }
-
-    /* ── Days grid ── */
-    .days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-    }
-
-    .day {
-      aspect-ratio: 1;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: default;
-      position: relative;
-      transition: box-shadow 0.14s ease;
-      user-select: none;
-    }
-
-    .day.empty { background: transparent; }
-
-    .day.out-range {
-      background: var(--day-oor);
-      color: var(--muted);
-      opacity: 0.4;
-    }
-
-    /* Default in-range day */
-    .day.in-range {
-      background: var(--day-bg);
-      color: var(--muted);
-      cursor: default;
-    }
-
-    /* Today */
-    .day.is-today {
-      background: var(--today);
-      color: #000;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .day.is-today:hover { z-index: 10; }
-
-    /* Yesterday */
-    .day.is-yesterday {
-      background: var(--yesterday);
-      color: #000;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .day.is-yesterday:hover { z-index: 10; }
-
-    /* Dot under today/yesterday */
-    .day.is-today::after,
-    .day.is-yesterday::after {
-      content: '';
-      position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.45);
-    }
-
-    /* Lit state */
-    .day.lit {
-      background: var(--lit) !important;
-      color: #000 !important;
-      font-weight: 700 !important;
-      cursor: pointer !important;
-      box-shadow: 0 0 7px rgba(206,228,114,0.6);
-      animation: pulse-lit 1.6s ease-in-out infinite;
-    }
-
-    .day.lit:hover { z-index: 10; }
-
-    /* ── Hover tooltip ── */
-    .cell-tooltip {
-      position: fixed;
-      z-index: 200;
-      background: #161616;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.15s ease;
-      max-width: 230px;
-      min-width: 140px;
-      font-family: 'DM Mono', monospace;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-
+    /* Tooltip */
+    .cell-tooltip { position: fixed; z-index: 200; background: #111; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; pointer-events: none; opacity: 0; transition: opacity 0.15s ease; max-width: 220px; min-width: 130px; font-family: 'DM Mono', monospace; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
     .cell-tooltip.visible { opacity: 1; }
+    .cell-tooltip::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 8px 8px 0 0; background: linear-gradient(90deg, var(--lit), transparent 70%); }
+    .tt-date { font-size: 10px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 4px; }
+    .tt-intensity { font-size: 10px; color: var(--yellow); margin-bottom: 4px; }
+    .tt-note { font-size: 11px; color: var(--text); line-height: 1.6; word-break: break-word; }
+    .tt-hint { font-size: 10px; color: var(--muted); margin-top: 5px; }
 
-    .cell-tooltip::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      border-radius: 8px 8px 0 0;
-      background: linear-gradient(90deg, var(--lit), transparent 70%);
+    /* Modals */
+    .modal-overlay, .notes-modal-overlay, .add-habit-overlay, .summary-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; z-index: 100;
+      opacity: 0; pointer-events: none; transition: opacity 0.22s ease;
     }
-
-    .tt-date {
-      font-size: 10px;
-      color: var(--orange);
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      margin-bottom: 5px;
+    .modal-overlay.active, .notes-modal-overlay.active, .add-habit-overlay.active, .summary-overlay.active { opacity: 1; pointer-events: all; }
+    .modal, .notes-modal, .add-habit-modal, .summary-modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%;
+      position: relative; overflow: hidden; transform: translateY(20px) scale(0.97); transition: transform 0.22s ease;
     }
-
-    .tt-note {
-      font-size: 11px;
-      color: var(--text);
-      line-height: 1.6;
-      word-break: break-word;
-    }
-
-    .tt-hint {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 5px;
-    }
-
-    /* Note indicator pencil on lit cells that have a saved note */
-    .day.lit.has-note::after {
-      content: '✏';
-      position: absolute;
-      top: 1px;
-      right: 2px;
-      font-size: 8px;
-      color: #000;
-      opacity: 0.7;
-      line-height: 1;
-    }
-
-    /* ── Notes Modal ── */
-    .notes-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.82);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 110;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.22s ease;
-    }
-
-    .notes-modal-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .notes-modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 28px 32px 24px;
-      width: 90%;
-      max-width: 460px;
-      transform: translateY(18px) scale(0.97);
-      transition: transform 0.22s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .notes-modal-overlay.active .notes-modal {
-      transform: translateY(0) scale(1);
-    }
-
-    .notes-modal::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--lit), transparent 70%);
-    }
-
-    .notes-modal-date {
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      color: var(--lit);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .notes-modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 16px;
-    }
-
-    .notes-textarea {
-      width: 100%;
-      min-height: 130px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      line-height: 1.7;
-      padding: 12px 14px;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.14s ease;
-    }
-
-    .notes-textarea:focus {
-      border-color: var(--lit);
-    }
-
-    .notes-textarea::placeholder {
-      color: var(--muted);
-    }
-
-    .notes-char-count {
-      font-size: 10px;
-      color: var(--muted);
-      text-align: right;
-      margin-top: 5px;
-      margin-bottom: 18px;
-    }
-
-    .notes-actions { display: flex; gap: 10px; }
-
-    /* @keyframes pulse-lit {
-      0%, 100% { box-shadow: 0 0 5px rgba(206,228,114,0.5); }
-      50%       { box-shadow: 0 0 12px rgba(206,228,114,0.85); }
-    } */
-
-    /* ── Legend ── */
-    .legend {
-      margin-top: 32px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .legend-items {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .legend-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      flex-shrink: 0;
-    }
-
-    .legend-text {
-      font-size: 11px;
-      color: var(--muted);
-      margin-right: 14px;
-    }
-
-    /* ── Modal ── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.82);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.22s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 32px 36px;
-      width: 90%;
-      max-width: 400px;
-      transform: translateY(18px) scale(0.97);
-      transition: transform 0.22s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .modal-overlay.active .modal {
-      transform: translateY(0) scale(1);
-    }
-
-    .modal::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--orange), var(--yellow));
-    }
-
+    .modal-overlay.active .modal, .notes-modal-overlay.active .notes-modal,
+    .add-habit-overlay.active .add-habit-modal, .summary-overlay.active .summary-modal { transform: translateY(0) scale(1); }
+    .modal { padding: 32px 36px; max-width: 420px; }
+    .modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange), var(--yellow)); }
     .modal-icon { font-size: 32px; margin-bottom: 14px; }
-
-    .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .modal-body {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.7;
-      margin-bottom: 26px;
-    }
-
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .modal-body { font-size: 13px; color: var(--muted2); line-height: 1.7; margin-bottom: 18px; }
     .modal-body strong { color: var(--orange); }
-
+    .modal-intensity { margin-bottom: 22px; }
+    .modal-intensity-label { font-size: 11px; color: var(--muted2); margin-bottom: 10px; letter-spacing: 0.08em; }
+    .modal-intensity-btns { display: flex; gap: 8px; }
+    .modal-int-btn { flex: 1; padding: 10px 0; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.14s ease; text-align: center; line-height: 1.4; }
+    .modal-int-btn:hover { border-color: var(--orange); color: var(--text); }
+    .modal-int-btn.sel { background: var(--orange); color: #000; border-color: var(--orange); font-weight: 700; }
     .modal-actions { display: flex; gap: 10px; }
+    .btn { flex: 1; padding: 11px 18px; border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.14s ease; letter-spacing: 0.04em; }
+    .btn-yes { background: var(--orange); color: #000; font-weight: 700; }
+    .btn-yes:hover { background: var(--yellow); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(255,161,22,0.4); }
+    .btn-no { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border); }
+    .btn-no:hover { color: var(--text); border-color: var(--muted); }
+    .notes-modal { padding: 28px 32px 24px; max-width: 480px; }
+    .notes-modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--lit), transparent 70%); }
+    .notes-modal-date { font-size: 11px; letter-spacing: 0.18em; color: var(--lit2); text-transform: uppercase; margin-bottom: 4px; }
+    .notes-modal-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+    .notes-textarea { width: 100%; min-height: 110px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.7; padding: 12px 14px; resize: vertical; outline: none; transition: border-color 0.14s; }
+    .notes-textarea:focus { border-color: var(--lit2); }
+    .notes-textarea::placeholder { color: var(--muted); }
+    .notes-char-count { font-size: 10px; color: var(--muted); text-align: right; margin-top: 5px; margin-bottom: 16px; }
+    .notes-actions { display: flex; gap: 10px; }
+    .add-habit-modal { padding: 28px 32px 24px; max-width: 440px; }
+    .add-habit-modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--purple), transparent 70%); }
+    .add-habit-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .form-field { margin-bottom: 16px; }
+    .form-label { font-size: 11px; color: var(--muted2); letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+    .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 14px; outline: none; transition: border-color 0.14s; }
+    .form-input:focus { border-color: var(--purple); }
+    .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+    .color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.14s, border-color 0.14s; }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: white; transform: scale(1.1); }
+    .summary-modal { padding: 32px; max-width: 440px; }
+    .summary-modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+    .summary-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .summary-sub { font-size: 12px; color: var(--muted2); margin-bottom: 24px; }
+    .summary-big { font-family: 'Playfair Display', serif; font-size: 48px; color: var(--orange); line-height: 1; margin-bottom: 8px; }
+    .summary-week-grid { display: flex; gap: 6px; margin-bottom: 24px; }
+    .summary-day-cell { flex: 1; border-radius: 5px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; border: 1px solid var(--border); }
+    .summary-detail { font-size: 13px; color: var(--muted2); line-height: 1.7; margin-bottom: 20px; }
 
-    .btn {
-      flex: 1;
-      padding: 11px 18px;
-      border-radius: 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: all 0.14s ease;
-      letter-spacing: 0.04em;
-    }
+    /* Streak Toast */
+    .streak-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: linear-gradient(135deg,#1a1a1a,#111); border: 1px solid var(--streak-color); border-radius: 10px; padding: 14px 22px; font-size: 13px; color: var(--text); box-shadow: 0 8px 32px rgba(255,107,53,0.3); z-index: 300; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap; }
+    .streak-toast.show { transform: translateX(-50%) translateY(0); }
+    .streak-toast strong { color: var(--streak-color); }
 
-    .btn-yes {
-      background: var(--orange);
-      color: #000;
-      font-weight: 700;
+    .edit-target-btn { display: none; }
+    .change-dates-btn {
+      width: 100%; margin-bottom: 20px; padding: 13px 20px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer; transition: all 0.18s ease;
+      font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text);
+      position: relative; overflow: hidden;
     }
+    .change-dates-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--purple)); border-radius: 8px 8px 0 0; }
+    .change-dates-btn:hover { border-color: var(--blue); box-shadow: 0 0 14px rgba(59,130,246,0.15); }
+    .change-dates-icon { font-size: 16px; }
+    .change-dates-range { margin-left: auto; font-size: 11px; color: var(--blue); letter-spacing: 0.06em; }
 
-    .btn-yes:hover {
-      background: var(--yellow);
-      transform: translateY(-1px);
-      box-shadow: 0 5px 18px rgba(255,161,22,0.45);
-    }
+    /* Target Date Modal */
+    .target-date-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.22s ease; }
+    .target-date-overlay.active { opacity: 1; pointer-events: all; }
+    .target-date-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 460px; position: relative; overflow: hidden; padding: 28px 32px 24px; transform: translateY(20px) scale(0.97); transition: transform 0.22s ease; }
+    .target-date-overlay.active .target-date-modal { transform: translateY(0) scale(1); }
+    .target-date-modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .target-date-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .target-date-sub { font-size: 11px; color: var(--muted2); margin-bottom: 22px; }
+    .date-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .date-field label { font-size: 10px; color: var(--muted2); letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 7px; }
+    .date-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.14s; cursor: pointer; }
+    .date-input:focus { border-color: var(--blue); }
+    .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+    .target-preview { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; font-size: 11px; color: var(--muted2); margin-bottom: 20px; line-height: 1.8; }
+    .target-preview strong { color: var(--orange); }
+    .edit-target-btn { background: none; border: none; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--blue); letter-spacing: 0.1em; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--blue); margin-left: 8px; transition: all 0.14s; vertical-align: middle; }
+    .edit-target-btn:hover { background: var(--blue); color: #000; }
 
-    .btn-no {
-      background: var(--surface2);
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-
-    .btn-no:hover {
-      color: var(--text);
-      border-color: var(--muted);
-    }
-
-    /* ── Quote block ── */
-    .quote-block {
-      margin-bottom: 28px;
-      padding: 18px 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .quote-block::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--orange) 0%, transparent 70%);
-      border-radius: 8px 8px 0 0;
-    }
-
-    .quote-mark {
-      font-family: 'Playfair Display', serif;
-      font-size: 48px;
-      line-height: 1;
-      color: var(--orange);
-      opacity: 0.25;
-      position: absolute;
-      top: 8px;
-      left: 18px;
-      user-select: none;
-    }
-
-    .quote-text {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
-      font-style: italic;
-      color: var(--text);
-      line-height: 1.65;
-      padding-left: 28px;
-    }
-
-    .quote-author {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--orange);
-      margin-top: 10px;
-      padding-left: 28px;
-      letter-spacing: 0.1em;
-    }
-
-    .performance-card {
-      margin-bottom: 28px;
-      padding: 18px 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .performance-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--green) 0%, transparent 70%);
-    }
-
-    .performance-metric {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .performance-label {
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .performance-value {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.2rem, 3vw, 2rem);
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .performance-subtext {
-      font-size: 11px;
-      color: var(--orange);
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 500px) {
-      .month-block { padding: 14px; }
-      .day { font-size: 9px; border-radius: 4px; }
-      h1 { font-size: 1.6rem; }
-      .performance-card { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .stat-card.forecast { grid-column: 1/-1; } .month-block { padding: 14px; } .day { font-size: 9px; } .date-fields { grid-template-columns: 1fr; } }
+    @media (max-width: 400px) { .stats-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-
 <div class="container">
   <header>
     <div class="header-text">
       <p class="label">// Activity Tracker //</p>
-      <h1> <span>Discipline</span></h1>
+      <h1><span>Discipline</span></h1>
       <p class="heading-date" id="today-heading-date">Today: Loading...</p>
-      <p class="subtitle" id="date-range-label">Loading current date range...</p>
+      <p class="subtitle">
+        <span id="date-range-label">Loading...</span>
+        <button class="edit-target-btn" id="edit-target-btn" title="Change target dates">✎ edit</button>
+      </p>
     </div>
     <div class="clock-wrap">
-      <canvas id="analog-clock" width="130" height="130"></canvas>
+      <canvas id="analog-clock" width="120" height="120"></canvas>
       <span class="clock-time-label" id="clock-time-label">00:00:00</span>
     </div>
   </header>
 
-  <div class="quote-block" id="quote-block">
+  <div class="habit-tabs-wrapper">
+    <p class="habit-tabs-label">Tracking Habits</p>
+    <div class="habit-tabs" id="habit-tabs">
+      <button class="add-habit-btn" id="add-habit-btn">+ New Habit</button>
+    </div>
+  </div>
+
+  <div class="quote-block">
     <div class="quote-mark">"</div>
     <div class="quote-text" id="quote-text"></div>
     <div class="quote-author" id="quote-author"></div>
   </div>
 
-  <div class="performance-card" id="performance-card">
-    <div class="performance-metric">
-      <span class="performance-label">Performance</span>
-      <span class="performance-value" id="performance-percent">0%</span>
-      <span class="performance-subtext" id="performance-detail">0 of 0 days lit</span>
+  <div class="weekly-summary" id="weekly-summary-bar">
+    <div class="weekly-summary-left">
+      <div class="weekly-summary-title">THIS WEEK</div>
+      <div class="weekly-summary-value" id="ws-value">0/7 days</div>
+      <div class="week-dots" id="ws-dots"></div>
     </div>
-    <div class="performance-metric">
-      <span class="performance-label">Lit Days</span>
-      <span class="performance-value" id="performance-lit-days">0</span>
-      <span class="performance-subtext">Days marked active</span>
+    <div class="weekly-summary-right">View weekly report →</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card perf">
+      <div class="stat-label">Performance</div>
+      <div class="stat-value" id="stat-perf">0%</div>
+      <div class="stat-sub orange" id="stat-perf-sub">0 of 0 days lit</div>
     </div>
-    <div class="performance-metric">
-      <span class="performance-label">Target Window</span>
-      <span class="performance-value" id="performance-total-days">0</span>
-      <span class="performance-subtext">16 March to 30 June</span>
+    <div class="stat-card streak">
+      <div class="stat-label">Current Streak</div>
+      <div class="stat-value" id="stat-streak">0</div>
+      <div class="stat-sub streak-col" id="stat-streak-sub">days</div>
+      <div class="streak-icon" id="streak-icon"></div>
     </div>
+    <div class="stat-card best">
+      <div class="stat-label">Best Streak</div>
+      <div class="stat-value" id="stat-best">0</div>
+      <div class="stat-sub orange">days ever</div>
+    </div>
+    <div class="stat-card target">
+      <div class="stat-label">Lit Days</div>
+      <div class="stat-value" id="stat-lit">0</div>
+      <div class="stat-sub" id="stat-lit-sub">of 0 days</div>
+    </div>
+    <div class="stat-card forecast">
+      <div class="stat-label">Projected Finish</div>
+      <div class="stat-value" id="stat-forecast">—</div>
+      <div class="stat-sub purple" id="stat-forecast-sub">At current pace</div>
+      <div class="forecast-bar"><div class="forecast-fill" id="forecast-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-header">
+      <span class="progress-bar-title">TARGET PROGRESS — 16 MAR → 30 JUN</span>
+      <span class="progress-bar-pct" id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-milestones">
+      <span class="milestone" id="ms-25">25%</span>
+      <span class="milestone" id="ms-50">50%</span>
+      <span class="milestone" id="ms-75">75%</span>
+      <span class="milestone" id="ms-100">100%</span>
+    </div>
+  </div>
+
+  <button class="change-dates-btn" id="change-dates-btn">
+    <span class="change-dates-icon">📅</span>
+    Change Target Dates
+    <span class="change-dates-range" id="change-dates-range"></span>
+  </button>
+
+  <div class="intensity-selector">
+    <span class="intensity-label">Default Effort:</span>
+    <button class="intensity-btn" data-v="1">1</button>
+    <button class="intensity-btn" data-v="2">2</button>
+    <button class="intensity-btn selected" data-v="3">3</button>
+    <button class="intensity-btn" data-v="4">4</button>
+    <button class="intensity-btn" data-v="5">5</button>
+    <span class="intensity-desc" id="intensity-desc">Moderate effort — solid session</span>
   </div>
 
   <div class="months-wrapper" id="months-wrapper"></div>
+
   <div class="legend">
-    <div class="legend-items">
-      <div class="legend-dot" style="background:var(--today)"></div>
-      <span class="legend-text">Today</span>
-      <div class="legend-dot" style="background:var(--yesterday)"></div>
-      <span class="legend-text">Yesterday</span>
-      <div class="legend-dot" style="background:var(--lit)"></div>
-      <span class="legend-text">Lit ✦</span>
-    </div>
+    <div class="legend-dot" style="background:var(--today)"></div><span class="legend-text">Today</span>
+    <div class="legend-dot" style="background:var(--yesterday)"></div><span class="legend-text">Yesterday</span>
+    <div class="legend-dot" style="background:#3d2a00;border:1px solid #ffa116"></div><span class="legend-text">Lit ×1</span>
+    <div class="legend-dot" style="background:#c47e0d"></div><span class="legend-text">Lit ×3</span>
+    <div class="legend-dot" style="background:#ffc01e;box-shadow:0 0 6px rgba(255,192,30,0.8)"></div><span class="legend-text">Lit ×5 (max)</span>
+    <div class="legend-dot" style="background:var(--day-bg);border:1px solid var(--border)"></div><span class="legend-text">Unlit</span>
   </div>
 </div>
 
-<!-- Shared hover tooltip -->
+<!-- Tooltip -->
 <div class="cell-tooltip" id="cell-tooltip">
   <div class="tt-date" id="tt-date"></div>
+  <div class="tt-intensity" id="tt-intensity"></div>
   <div class="tt-note" id="tt-note"></div>
   <div class="tt-hint" id="tt-hint"></div>
 </div>
 
-<!-- Modal -->
+<!-- Light-up Modal -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-icon" id="modal-icon">🔆</div>
     <div class="modal-title" id="modal-title">Light up today?</div>
-    <div class="modal-body" id="modal-body">
-      Do you want to mark <strong id="modal-date-label"></strong> as active and light it up on the heatmap?
+    <div class="modal-body">Mark <strong id="modal-date-label"></strong> as active?</div>
+    <div class="modal-intensity">
+      <div class="modal-intensity-label">Rate your effort (1 = minimal · 5 = legendary)</div>
+      <div class="modal-intensity-btns">
+        <button class="modal-int-btn" data-v="1">1<br><small style="font-size:9px;opacity:0.7">minimal</small></button>
+        <button class="modal-int-btn" data-v="2">2<br><small style="font-size:9px;opacity:0.7">light</small></button>
+        <button class="modal-int-btn sel" data-v="3">3<br><small style="font-size:9px;opacity:0.7">moderate</small></button>
+        <button class="modal-int-btn" data-v="4">4<br><small style="font-size:9px;opacity:0.7">strong</small></button>
+        <button class="modal-int-btn" data-v="5">5<br><small style="font-size:9px;opacity:0.7">max 🔥</small></button>
+      </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-yes" id="btn-yes">Yes, light it up</button>
+      <button class="btn btn-yes" id="btn-yes">Light it up ✦</button>
       <button class="btn btn-no" id="btn-no">Not now</button>
     </div>
   </div>
@@ -739,611 +395,442 @@
   <div class="notes-modal">
     <div class="notes-modal-date" id="notes-modal-date"></div>
     <div class="notes-modal-title">Day Notes</div>
-    <textarea class="notes-textarea" id="notes-textarea" placeholder="Write your note for this day…" maxlength="500"></textarea>
+    <textarea class="notes-textarea" id="notes-textarea" placeholder="What did you accomplish today? Reflect on your effort…" maxlength="500"></textarea>
     <div class="notes-char-count"><span id="notes-char-count">0</span> / 500</div>
     <div class="notes-actions">
-      <button class="btn btn-no" id="notes-btn-cancel-lit">Cancel lit up</button>
-      <button class="btn btn-yes" id="notes-btn-save">Save note</button>
+      <button class="btn btn-no" id="notes-btn-cancel-lit">Undo lit</button>
+      <button class="btn btn-yes" id="notes-btn-save">Save ✦</button>
       <button class="btn btn-no" id="notes-btn-close">Close</button>
     </div>
   </div>
 </div>
 
+<!-- Add Habit Modal -->
+<div class="add-habit-overlay" id="add-habit-overlay">
+  <div class="add-habit-modal">
+    <div class="add-habit-title">New Habit</div>
+    <div class="form-field">
+      <label class="form-label">HABIT NAME</label>
+      <input class="form-input" id="habit-name-input" placeholder="e.g. Gym, Reading, Coding…" maxlength="30"/>
+    </div>
+    <div class="form-field">
+      <label class="form-label">COLOR</label>
+      <div class="color-swatches" id="color-swatches"></div>
+    </div>
+    <div class="modal-actions" style="margin-top:8px">
+      <button class="btn btn-yes" id="habit-save-btn">Create Habit</button>
+      <button class="btn btn-no" id="habit-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weekly Summary Modal -->
+<div class="summary-overlay" id="summary-overlay">
+  <div class="summary-modal">
+    <div class="summary-title">Weekly Report</div>
+    <div class="summary-sub" id="sum-sub">Week of...</div>
+    <div class="summary-big" id="sum-big">0/7</div>
+    <div class="summary-week-grid" id="sum-grid"></div>
+    <div class="summary-detail" id="sum-detail"></div>
+    <div class="modal-actions">
+      <button class="btn btn-yes" id="sum-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Streak Toast -->
+<div class="streak-toast" id="streak-toast">🔥 <strong id="streak-toast-num">0</strong>-day streak! Keep going.</div>
+
+<!-- Target Date Modal -->
+<div class="target-date-overlay" id="target-date-overlay">
+  <div class="target-date-modal">
+    <div class="target-date-title">Set Target Window</div>
+    <div class="target-date-sub">Choose your start and end dates for the heatmap tracking range.</div>
+    <div class="date-fields">
+      <div class="date-field">
+        <label>Start Date</label>
+        <input type="date" class="date-input" id="target-start-input"/>
+      </div>
+      <div class="date-field">
+        <label>End Date</label>
+        <input type="date" class="date-input" id="target-end-input"/>
+      </div>
+    </div>
+    <div class="target-preview" id="target-preview">
+      Pick dates above to preview your window.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-yes" id="target-save-btn">Save Target ✦</button>
+      <button class="btn btn-no" id="target-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  // ── Config ────────────────────────────────────────────────────
-  function startOfDay(date) {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+function startOfDay(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function formatDisplay(d){return d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}
+function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function parseDateKey(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d);}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+
+const today=startOfDay(new Date());
+const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
+
+function loadTargetDates(){
+  try {
+    const s = localStorage.getItem('dt_target');
+    if(s){ const {start,end}=JSON.parse(s); return {RANGE_START:parseDateKey(start),RANGE_END:parseDateKey(end)}; }
+  } catch {}
+  return { RANGE_START: new Date(today.getFullYear(),2,16), RANGE_END: new Date(today.getFullYear(),5,30) };
+}
+function saveTargetDates(start,end){ localStorage.setItem('dt_target',JSON.stringify({start:dateKey(start),end:dateKey(end)})); }
+
+let {RANGE_START,RANGE_END} = loadTargetDates();
+
+function refreshHeader(){
+  document.getElementById('today-heading-date').textContent=`Today: ${formatDisplay(today)}`;
+  document.getElementById('date-range-label').textContent=`${formatDisplay(RANGE_START)}  —  ${formatDisplay(RANGE_END)}`;
+  const cr=document.getElementById('change-dates-range');
+  if(cr) cr.textContent=`${formatDisplay(RANGE_START)} → ${formatDisplay(RANGE_END)}`;
+}
+refreshHeader();
+
+function inRange(d){const t=startOfDay(d);return t>=RANGE_START&&t<=RANGE_END;}
+function isFuture(d){return startOfDay(d)>today;}
+function getTotalDays(){return Math.floor((RANGE_END-RANGE_START)/86400000)+1;}
+
+const SWATCH_COLORS=['#ffa116','#00c853','#3b82f6','#8b5cf6','#ec4899','#ef4444','#14b8a6','#f59e0b'];
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let habits=JSON.parse(localStorage.getItem('dt_habits')||'null')||[{id:'default',name:'Discipline',color:'#ffa116'}];
+let activeHabitId=habits[0].id;
+function saveHabits(){localStorage.setItem('dt_habits',JSON.stringify(habits));}
+function activeHabit(){return habits.find(h=>h.id===activeHabitId)||habits[0];}
+
+function storageKey(hid){return`dt_lit_${hid}`;}
+function notesKey(hid){return`dt_notes_${hid}`;}
+function loadLit(hid){try{const s=localStorage.getItem(storageKey(hid));return s?new Map(JSON.parse(s)):new Map();}catch{return new Map();}}
+function saveLit(hid,map){try{localStorage.setItem(storageKey(hid),JSON.stringify([...map]));}catch{}}
+function loadNotes(hid){try{const s=localStorage.getItem(notesKey(hid));return s?JSON.parse(s):{};}catch{return{};}}
+function saveNoteEntry(hid,key,text){const n=loadNotes(hid);if(text.trim())n[key]=text;else delete n[key];try{localStorage.setItem(notesKey(hid),JSON.stringify(n));}catch{}}
+function getLit(){return loadLit(activeHabitId);}
+function getNotes(){return loadNotes(activeHabitId);}
+
+function computeStreaks(litMap){
+  let runCur=0,runBest=0;
+  const tmp=new Date(RANGE_START);
+  while(tmp<=today){
+    if(litMap.has(dateKey(tmp))){runCur++;runBest=Math.max(runBest,runCur);}else{runCur=0;}
+    tmp.setDate(tmp.getDate()+1);
   }
+  let cc=0,td=new Date(today);
+  if(!litMap.has(dateKey(td)))td.setDate(td.getDate()-1);
+  while(litMap.has(dateKey(td))&&inRange(td)){cc++;td.setDate(td.getDate()-1);}
+  return{current:cc,best:runBest};
+}
 
-  function formatDisplayDate(date) {
-    return date.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  }
+function getWeekData(litMap){
+  const days=[],sun=new Date(today);sun.setDate(today.getDate()-today.getDay());
+  for(let i=0;i<7;i++){const d=new Date(sun);d.setDate(sun.getDate()+i);days.push({date:d,key:dateKey(d),lit:litMap.has(dateKey(d)),isToday:sameDay(d,today)});}
+  return days;
+}
 
-  const today     = startOfDay(new Date());
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const RANGE_START = new Date(today.getFullYear(), 2, 16);
-  const RANGE_END   = new Date(today.getFullYear(), 6, 2);
+function updateAll(){
+  const litMap=getLit(),notes=getNotes(),totalDays=getTotalDays(),litCount=litMap.size;
+  const pct=totalDays?((litCount/totalDays)*100).toFixed(1):'0.0';
+  const{current,best}=computeStreaks(litMap);
+  document.getElementById('stat-perf').textContent=pct+'%';
+  document.getElementById('stat-perf-sub').textContent=`${litCount} of ${totalDays} days lit`;
+  document.getElementById('stat-streak').textContent=current;
+  document.getElementById('stat-streak-sub').textContent=current>0?'days 🔥':'days';
+  document.getElementById('streak-icon').textContent=current>=7?'🔥':current>=3?'⚡':'';
+  document.getElementById('stat-best').textContent=best;
+  document.getElementById('stat-lit').textContent=litCount;
+  document.getElementById('stat-lit-sub').textContent=`of ${totalDays} days`;
+  const fillPct=Math.min(100,parseFloat(pct));
+  document.getElementById('progress-fill').style.width=fillPct+'%';
+  document.getElementById('progress-pct').textContent=pct+'%';
+  ['25','50','75','100'].forEach(ms=>{document.getElementById('ms-'+ms).classList.toggle('reached',fillPct>=parseInt(ms));});
+  const daysPassed=Math.max(1,Math.floor((today-RANGE_START)/86400000)+1);
+  const rate=litCount/daysPassed,proj=Math.round(rate*totalDays),projPct=Math.round((proj/totalDays)*100);
+  document.getElementById('stat-forecast').textContent=projPct+'%';
+  document.getElementById('stat-forecast-sub').textContent=`≈${proj} days projected`;
+  document.getElementById('forecast-fill').style.width=Math.min(100,projPct)+'%';
+  const week=getWeekData(litMap),litW=week.filter(d=>d.lit&&d.date<=today).length;
+  document.getElementById('ws-value').textContent=`${litW}/7 days`;
+  const dotsEl=document.getElementById('ws-dots');dotsEl.innerHTML='';
+  week.forEach(d=>{const dot=document.createElement('div');dot.className='week-dot'+(d.lit?' active':'')+(d.isToday?' today-dot':'');dotsEl.appendChild(dot);});
+  rebuildCalendar();
+}
 
-  document.getElementById('today-heading-date').textContent = `Today: ${formatDisplayDate(today)}`;
-  document.getElementById('date-range-label').innerHTML =
-    `${formatDisplayDate(RANGE_START)} &nbsp;—&nbsp; ${formatDisplayDate(RANGE_END)}`;
+function buildHabitTabs(){
+  const container=document.getElementById('habit-tabs');
+  [...container.querySelectorAll('.habit-tab')].forEach(t=>t.remove());
+  const addBtn=document.getElementById('add-habit-btn');
+  habits.forEach(h=>{
+    const tab=document.createElement('button');
+    tab.className='habit-tab'+(h.id===activeHabitId?' active':'');
+    tab.innerHTML=`<div class="habit-dot" style="background:${h.color}"></div>${h.name}`;
+    tab.addEventListener('click',()=>{activeHabitId=h.id;buildHabitTabs();updateAll();});
+    container.insertBefore(tab,addBtn);
+  });
+}
 
-  // ── localStorage persistence ─────────────────────────────────
-  const STORAGE_KEY = 'heatmap_lit_days';
-  function loadLitDays() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch { return new Set(); }
-  }
-  function saveLitDays() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...litDays])); } catch {}
-  }
-  const litDays = loadLitDays(); // Persisted across sessions
+function getMonthsInRange(){
+  const months=[];let y=RANGE_START.getFullYear(),m=RANGE_START.getMonth();
+  const ey=RANGE_END.getFullYear(),em=RANGE_END.getMonth();
+  while(y<ey||(y===ey&&m<=em)){months.push({year:y,month:m});if(++m>11){m=0;y++;}}
+  return months;
+}
 
-  function sanitizeLitDays() {
-    let changed = false;
-    [...litDays].forEach(key => {
-      const date = parseDateKey(key);
-      if (!inRange(date) || startOfDay(date) > today) {
-        litDays.delete(key);
-        changed = true;
-      }
-    });
-    if (changed) saveLitDays();
-  }
-
-  // ── Notes persistence ────────────────────────────────────────
-  const NOTES_KEY = 'heatmap_notes';
-  function loadNotes() {
-    try {
-      const saved = localStorage.getItem(NOTES_KEY);
-      return saved ? JSON.parse(saved) : {};
-    } catch { return {}; }
-  }
-  function saveNote(key, text) {
-    if (text.trim()) {
-      notes[key] = text;
-    } else {
-      delete notes[key];
-    }
-    try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch {}
-  }
-  const notes = loadNotes();
-
-  // ── Helpers ──────────────────────────────────────────────────
-  function dateKey(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-
-  function parseDateKey(key) {
-    const [year, month, day] = key.split('-').map(Number);
-    return new Date(year, month - 1, day);
-  }
-
-  function sameDay(a, b) {
-    return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
-  }
-
-  function inRange(d) {
-    const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    return t >= RANGE_START && t <= RANGE_END;
-  }
-
-  function isFutureDate(d) {
-    return startOfDay(d) > today;
-  }
-
-  function getTotalTrackedDays() {
-    const msPerDay = 24 * 60 * 60 * 1000;
-    return Math.floor((startOfDay(RANGE_END) - startOfDay(RANGE_START)) / msPerDay) + 1;
-  }
-
-  sanitizeLitDays();
-
-  function getLitDaysCount() {
-    let count = 0;
-    litDays.forEach(key => {
-      if (inRange(parseDateKey(key))) count++;
-    });
-    return count;
-  }
-
-  function updatePerformanceStats() {
-    const totalDays = getTotalTrackedDays();
-    const litCount = getLitDaysCount();
-    const percentage = totalDays ? ((litCount / totalDays) * 100).toFixed(1) : '0.0';
-
-    document.getElementById('performance-percent').textContent = `${percentage}%`;
-    document.getElementById('performance-detail').textContent = `${litCount} of ${totalDays} days lit`;
-    document.getElementById('performance-lit-days').textContent = String(litCount);
-    document.getElementById('performance-total-days').textContent = String(totalDays);
-  }
-
-  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const DAY_NAMES   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-  // ── Build calendar ───────────────────────────────────────────
-  // Determine months to render
-  function getMonthsInRange() {
-    const months = [];
-    let y = RANGE_START.getFullYear(), m = RANGE_START.getMonth();
-    const ey = RANGE_END.getFullYear(),  em = RANGE_END.getMonth();
-    while (y < ey || (y === ey && m <= em)) {
-      months.push({ year: y, month: m });
-      m++;
-      if (m > 11) { m = 0; y++; }
-    }
-    return months;
-  }
-
-  function buildMonth(year, month) {
-    const block = document.createElement('div');
-    block.className = 'month-block';
-
-    // Title
-    const title = document.createElement('div');
-    title.className = 'month-title';
-    title.innerHTML = `${MONTH_NAMES[month]} <span class="year-tag">${year}</span>`;
-    block.appendChild(title);
-
-    // Weekday headers
-    const wdRow = document.createElement('div');
-    wdRow.className = 'weekdays';
-    DAY_NAMES.forEach(d => {
-      const wd = document.createElement('div');
-      wd.className = 'wd';
-      wd.textContent = d;
-      wdRow.appendChild(wd);
-    });
-    block.appendChild(wdRow);
-
-    // Days grid
-    const grid = document.createElement('div');
-    grid.className = 'days-grid';
-
-    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Empty cells before first day
-    for (let i = 0; i < firstDay; i++) {
-      const empty = document.createElement('div');
-      empty.className = 'day empty';
-      grid.appendChild(empty);
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
-      const key  = dateKey(date);
-      const cell = document.createElement('div');
-      cell.className = 'day';
-      cell.textContent = d;
-      cell.dataset.key = key;
-      cell.dataset.date = date.toDateString();
-
-      if (!inRange(date)) {
-        cell.classList.add('out-range');
-      } else if (litDays.has(key)) {
-        cell.classList.add('in-range', 'lit');
-        attachNoteHandler(cell, key);
-      } else if (sameDay(date, today)) {
-        if (litDays.has(key)) {
-          cell.classList.add('in-range', 'lit');
-          attachNoteHandler(cell, key);
-        } else {
-          cell.classList.add('in-range', 'is-today');
-          cell.style.cursor = 'pointer';
-          attachClickHandler(cell, date);
-          attachTooltip(cell, 'Click to light it up');
-        }
-      } else if (sameDay(date, yesterday)) {
-        if (litDays.has(key)) {
-          cell.classList.add('in-range', 'lit');
-          attachNoteHandler(cell, key);
-        } else {
-          cell.classList.add('in-range', 'is-yesterday');
-          cell.style.cursor = 'pointer';
-          attachClickHandler(cell, date);
-          attachTooltip(cell, 'Click to light it up');
-        }
-      } else {
-        cell.classList.add('in-range');
-        if (isFutureDate(date)) {
-          cell.style.cursor = 'default';
-          attachTooltip(cell, 'Future date (cannot light yet)');
-        } else {
-          cell.style.cursor = 'pointer';
-          attachClickHandler(cell, date);
-          attachTooltip(cell, 'Click to light it up');
-        }
-      }
-
+function rebuildCalendar(){
+  const wrapper=document.getElementById('months-wrapper');wrapper.innerHTML='';
+  const litMap=getLit(),notes=getNotes(),habit=activeHabit();
+  getMonthsInRange().forEach(({year,month})=>{
+    const block=document.createElement('div');block.className='month-block';
+    let monthLit=0;const dim=new Date(year,month+1,0).getDate();
+    for(let d=1;d<=dim;d++){if(litMap.has(dateKey(new Date(year,month,d))))monthLit++;}
+    block.innerHTML=`<div class="month-title">${MONTH_NAMES[month]}<span class="year-tag">${year}</span><span class="month-lit-count" style="color:${habit.color}">${monthLit} lit</span></div><div class="weekdays">${DAY_NAMES.map(d=>`<div class="wd">${d}</div>`).join('')}</div><div class="days-grid" id="grid-${year}-${month}"></div>`;
+    wrapper.appendChild(block);
+    const grid=block.querySelector('.days-grid');
+    const firstDay=new Date(year,month,1).getDay();
+    for(let i=0;i<firstDay;i++){const e=document.createElement('div');e.className='day empty';grid.appendChild(e);}
+    for(let d=1;d<=dim;d++){
+      const date=new Date(year,month,d),key=dateKey(date);
+      const cell=document.createElement('div');cell.className='day';cell.textContent=d;cell.dataset.key=key;cell.dataset.date=date.toDateString();
+      if(!inRange(date)){cell.classList.add('out-range');}
+      else if(litMap.has(key)){
+        const intensity=litMap.get(key)||3;
+        cell.classList.add('in-range',`lit-${intensity}`);
+        if(notes[key])cell.classList.add('has-note');
+        cell.style.cursor='pointer';
+        attachNoteHandler(cell,key,date);
+      }else if(sameDay(date,today)){cell.classList.add('in-range','is-today');cell.style.cursor='pointer';attachClickHandler(cell,date);attachTooltip(cell,'Click to light it up');}
+      else if(sameDay(date,yesterday)){cell.classList.add('in-range','is-yesterday');cell.style.cursor='pointer';attachClickHandler(cell,date);attachTooltip(cell,'Click to light it up');}
+      else if(isFuture(date)){cell.classList.add('in-range');attachTooltip(cell,'Future date');}
+      else{cell.classList.add('in-range');cell.style.cursor='pointer';attachClickHandler(cell,date);attachTooltip(cell,'Click to light it up');}
       grid.appendChild(cell);
     }
-
-    block.appendChild(grid);
-    return block;
-  }
-
-  // ── Notes Modal logic ────────────────────────────────────────
-  let activeNoteKey = null;
-
-  function openNotesModal(key, dateStr) {
-    activeNoteKey = key;
-    document.getElementById('notes-modal-date').textContent = dateStr;
-    const text = notes[key] || '';
-    const ta = document.getElementById('notes-textarea');
-    ta.value = text;
-    document.getElementById('notes-char-count').textContent = text.length;
-    document.getElementById('notes-modal-overlay').classList.add('active');
-    ta.focus();
-  }
-
-  function closeNotesModal() {
-    document.getElementById('notes-modal-overlay').classList.remove('active');
-    activeNoteKey = null;
-  }
-
-  document.getElementById('notes-textarea').addEventListener('input', function() {
-    document.getElementById('notes-char-count').textContent = this.value.length;
   });
+}
 
-  document.getElementById('notes-btn-save').addEventListener('click', () => {
-    if (activeNoteKey) {
-      const text = document.getElementById('notes-textarea').value;
-      saveNote(activeNoteKey, text);
-      // Update has-note indicator on the cell
-      document.querySelectorAll(`.day.lit[data-key="${activeNoteKey}"]`).forEach(cell => {
-        cell.classList.toggle('has-note', !!text.trim());
-      });
-    }
-    closeNotesModal();
+const tooltip=document.getElementById('cell-tooltip');
+function showTooltip(cell,hint){
+  const key=cell.dataset.key,notes=getNotes(),litMap=getLit();
+  const note=key&&notes[key]?notes[key]:'',intensity=key&&litMap.has(key)?litMap.get(key):null;
+  const iLabels=['','Minimal','Light','Moderate','Strong','Maximum 🔥'];
+  document.getElementById('tt-date').textContent=cell.dataset.date||'';
+  const ti=document.getElementById('tt-intensity');ti.textContent=intensity?`Intensity ${intensity} — ${iLabels[intensity]}`:'' ;ti.style.display=intensity?'block':'none';
+  const tn=document.getElementById('tt-note');tn.textContent=note;tn.style.display=note?'block':'none';
+  document.getElementById('tt-hint').textContent=hint||(note?'Click to edit note':'Click to add note');
+  const rect=cell.getBoundingClientRect(),tw=tooltip.offsetWidth||160,th=tooltip.offsetHeight||60;
+  let left=rect.left+rect.width/2-tw/2,top=rect.top-th-10;
+  left=Math.max(8,Math.min(left,window.innerWidth-tw-8));if(top<8)top=rect.bottom+10;
+  tooltip.style.left=left+'px';tooltip.style.top=top+'px';tooltip.classList.add('visible');
+}
+function hideTooltip(){tooltip.classList.remove('visible');}
+function attachTooltip(cell,hint){cell.addEventListener('mouseenter',()=>showTooltip(cell,hint));cell.addEventListener('mouseleave',hideTooltip);}
+
+let pendingCell=null,pendingKey=null,selectedModalIntensity=3;
+function attachClickHandler(cell,date){
+  cell.addEventListener('click',()=>{
+    if(isFuture(date))return;const key=dateKey(date);if(getLit().has(key))return;
+    pendingCell=cell;pendingKey=key;
+    const isT=sameDay(date,today),isY=sameDay(date,yesterday);
+    document.getElementById('modal-icon').textContent=isT?'🔆':isY?'🌙':'📅';
+    document.getElementById('modal-title').textContent=isT?'Light up today?':isY?'Light up yesterday?':'Light up this day?';
+    document.getElementById('modal-date-label').textContent=date.toDateString();
+    selectedModalIntensity=currentIntensity;
+    document.querySelectorAll('.modal-int-btn').forEach(b=>b.classList.toggle('sel',+b.dataset.v===selectedModalIntensity));
+    document.getElementById('modal-overlay').classList.add('active');
   });
+}
 
-  document.getElementById('notes-btn-cancel-lit').addEventListener('click', () => {
-    if (!activeNoteKey) {
-      closeNotesModal();
-      return;
-    }
+document.querySelectorAll('.modal-int-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{selectedModalIntensity=+btn.dataset.v;document.querySelectorAll('.modal-int-btn').forEach(b=>b.classList.toggle('sel',b===btn));});
+});
 
-    litDays.delete(activeNoteKey);
-    saveLitDays();
-    updatePerformanceStats();
+document.getElementById('btn-yes').addEventListener('click',()=>{
+  if(pendingCell&&pendingKey){
+    const litMap=getLit();litMap.set(pendingKey,selectedModalIntensity);saveLit(activeHabitId,litMap);
+    closeModal();updateAll();checkStreakToast();
+    const pc=pendingCell,pk=pendingKey;pendingCell=null;pendingKey=null;
+    openNotesModal(pk,pc.dataset.date);return;
+  }closeModal();
+});
+document.getElementById('btn-no').addEventListener('click',closeModal);
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});
+function closeModal(){document.getElementById('modal-overlay').classList.remove('active');}
 
-    document.querySelectorAll(`.day[data-key="${activeNoteKey}"]`).forEach(cell => {
-      const date = parseDateKey(activeNoteKey);
-      const freshCell = cell.cloneNode(true);
-      freshCell.className = 'day in-range';
-      freshCell.classList.remove('lit', 'has-note', 'is-today', 'is-yesterday');
+let activeNoteKey=null;
+function openNotesModal(key,dateStr){
+  activeNoteKey=key;
+  document.getElementById('notes-modal-date').textContent=dateStr||'';
+  const text=getNotes()[key]||'';
+  const ta=document.getElementById('notes-textarea');ta.value=text;
+  document.getElementById('notes-char-count').textContent=text.length;
+  document.getElementById('notes-modal-overlay').classList.add('active');
+  setTimeout(()=>ta.focus(),200);
+}
+function closeNotesModal(){document.getElementById('notes-modal-overlay').classList.remove('active');activeNoteKey=null;}
+document.getElementById('notes-textarea').addEventListener('input',function(){document.getElementById('notes-char-count').textContent=this.value.length;});
+document.getElementById('notes-btn-save').addEventListener('click',()=>{if(activeNoteKey){saveNoteEntry(activeHabitId,activeNoteKey,document.getElementById('notes-textarea').value);updateAll();}closeNotesModal();});
+document.getElementById('notes-btn-cancel-lit').addEventListener('click',()=>{
+  if(!activeNoteKey){closeNotesModal();return;}
+  const litMap=getLit();litMap.delete(activeNoteKey);saveLit(activeHabitId,litMap);updateAll();closeNotesModal();
+});
+document.getElementById('notes-btn-close').addEventListener('click',closeNotesModal);
+document.getElementById('notes-modal-overlay').addEventListener('click',e=>{if(e.target.id==='notes-modal-overlay')closeNotesModal();});
+function attachNoteHandler(cell,key,date){attachTooltip(cell,undefined);cell.addEventListener('click',()=>openNotesModal(key,cell.dataset.date));}
 
-      if (sameDay(date, today)) {
-        freshCell.classList.add('is-today');
-        freshCell.style.cursor = 'pointer';
-        attachClickHandler(freshCell, date);
-        attachTooltip(freshCell, 'Click to light it up');
-      } else if (sameDay(date, yesterday)) {
-        freshCell.classList.add('is-yesterday');
-        freshCell.style.cursor = 'pointer';
-        attachClickHandler(freshCell, date);
-        attachTooltip(freshCell, 'Click to light it up');
-      } else if (isFutureDate(date)) {
-        freshCell.style.cursor = 'default';
-        attachTooltip(freshCell, 'Future date (cannot light yet)');
-      } else {
-        freshCell.style.cursor = 'pointer';
-        attachClickHandler(freshCell, date);
-        attachTooltip(freshCell, 'Click to light it up');
-      }
-
-      cell.replaceWith(freshCell);
-    });
-
-    closeNotesModal();
+let selectedSwatchColor=SWATCH_COLORS[2];
+(function buildSwatches(){
+  const container=document.getElementById('color-swatches');
+  SWATCH_COLORS.forEach((c,i)=>{
+    const s=document.createElement('div');s.className='color-swatch'+(i===2?' selected':'');s.style.background=c;
+    s.addEventListener('click',()=>{selectedSwatchColor=c;document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('selected'));s.classList.add('selected');});
+    container.appendChild(s);
   });
+})();
 
-  document.getElementById('notes-btn-close').addEventListener('click', closeNotesModal);
+document.getElementById('add-habit-btn').addEventListener('click',()=>{document.getElementById('habit-name-input').value='';document.getElementById('add-habit-overlay').classList.add('active');setTimeout(()=>document.getElementById('habit-name-input').focus(),200);});
+document.getElementById('habit-save-btn').addEventListener('click',()=>{
+  const name=document.getElementById('habit-name-input').value.trim();if(!name)return;
+  const id='h_'+Date.now();habits.push({id,name,color:selectedSwatchColor});saveHabits();activeHabitId=id;
+  document.getElementById('add-habit-overlay').classList.remove('active');buildHabitTabs();updateAll();
+});
+document.getElementById('habit-cancel-btn').addEventListener('click',()=>document.getElementById('add-habit-overlay').classList.remove('active'));
+document.getElementById('add-habit-overlay').addEventListener('click',e=>{if(e.target.id==='add-habit-overlay')document.getElementById('add-habit-overlay').classList.remove('active');});
 
-  document.getElementById('notes-modal-overlay').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('notes-modal-overlay')) closeNotesModal();
+document.getElementById('weekly-summary-bar').addEventListener('click',openSummary);
+document.getElementById('sum-close').addEventListener('click',()=>document.getElementById('summary-overlay').classList.remove('active'));
+document.getElementById('summary-overlay').addEventListener('click',e=>{if(e.target.id==='summary-overlay')document.getElementById('summary-overlay').classList.remove('active');});
+
+function openSummary(){
+  const litMap=getLit(),week=getWeekData(litMap),litCount=week.filter(d=>d.lit&&d.date<=today).length;
+  const{current,best}=computeStreaks(litMap);
+  const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dayColors=['#3d2a00','#6b3d00','#c47e0d','#ffa116','#ffc01e'];
+  document.getElementById('sum-sub').textContent=`Week of ${formatDisplay(week[0].date)}`;
+  document.getElementById('sum-big').textContent=`${litCount}/7`;
+  const grid=document.getElementById('sum-grid');grid.innerHTML='';
+  week.forEach(d=>{
+    const intensity=litMap.get(d.key)||0;
+    const cell=document.createElement('div');cell.className='summary-day-cell';
+    cell.style.background=d.lit?(dayColors[intensity-1]||'#ffa116'):'var(--surface2)';
+    cell.style.color=d.lit?'#000':'var(--muted)';
+    cell.textContent=dayNames[d.date.getDay()][0];
+    if(d.isToday)cell.style.boxShadow='0 0 0 2px var(--green)';
+    grid.appendChild(cell);
   });
+  const msgs=litCount>=7?['Perfect week — truly legendary. 🏆 Every day, no excuses.']
+    :litCount>=5?['Strong week. Great consistency. Keep this momentum.']
+    :litCount>=3?['Decent week. Push for one more day next week.']
+    :litCount>=1?['Slow start. The streak begins now.']
+    :['Zero days this week. Tomorrow is a fresh start.'];
+  document.getElementById('sum-detail').textContent=msgs[0]+` Current streak: ${current} days. Personal best: ${best} days.`;
+  document.getElementById('summary-overlay').classList.add('active');
+}
 
-  function attachNoteHandler(cell, key) {
-    cell.addEventListener('click', () => {
-      openNotesModal(key, cell.dataset.date);
-    });
-    if (notes[key]) cell.classList.add('has-note');
-    attachTooltip(cell, undefined); // hint computed dynamically from note state
+function checkStreakToast(){
+  const litMap=getLit();const{current}=computeStreaks(litMap);
+  if(current>=2){const t=document.getElementById('streak-toast');document.getElementById('streak-toast-num').textContent=current;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+}
+
+let currentIntensity=3;
+const intensityDescs=['','Just showed up — minimal effort','Light session — decent work','Moderate effort — solid session','Strong effort — great work!','Maximum effort — legendary! 🔥'];
+document.querySelectorAll('.intensity-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{currentIntensity=+btn.dataset.v;document.querySelectorAll('.intensity-btn').forEach(b=>b.classList.toggle('selected',b===btn));document.getElementById('intensity-desc').textContent=intensityDescs[currentIntensity];});
+});
+
+const QUOTES=[
+  {text:"We are what we repeatedly do. Excellence, then, is not an act, but a habit.",author:"Aristotle"},
+  {text:"Discipline is the bridge between goals and accomplishment.",author:"Jim Rohn"},
+  {text:"You don't rise to the level of your goals. You fall to the level of your systems.",author:"James Clear"},
+  {text:"You have power over your mind, not outside events. Realize this, and you will find strength.",author:"Marcus Aurelius"},
+  {text:"The impediment to action advances action. What stands in the way becomes the way.",author:"Marcus Aurelius"},
+  {text:"Do every act of your life as though it were the very last act of your life.",author:"Marcus Aurelius"},
+  {text:"Confine yourself to the present.",author:"Marcus Aurelius"},
+  {text:"No man is free who is not master of himself.",author:"Epictetus"},
+  {text:"How long are you going to wait before you demand the best of yourself?",author:"Epictetus"},
+  {text:"Don't explain your philosophy. Embody it.",author:"Epictetus"},
+  {text:"We suffer more in imagination than in reality.",author:"Seneca"},
+  {text:"Most powerful is he who has himself in his own power.",author:"Seneca"},
+  {text:"Luck is what happens when preparation meets opportunity.",author:"Seneca"},
+  {text:"Man conquers the world by conquering himself.",author:"Zeno of Citium"},
+  {text:"Hard work beats talent when talent doesn't work hard.",author:"Tim Notke"},
+  {text:"The pain of discipline is far less than the pain of regret.",author:"Sarah Bombell"},
+  {text:"Champions aren't made in gyms. Champions are made from something deep inside.",author:"Muhammad Ali"},
+  {text:"Either you run the day or the day runs you.",author:"Jim Rohn"},
+  {text:"Small daily improvements over time lead to stunning results.",author:"Robin Sharma"},
+];
+(function(){const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];document.getElementById('quote-text').textContent=q.text;document.getElementById('quote-author').textContent='— '+q.author;})();
+
+(function(){
+  const canvas=document.getElementById('analog-clock');const ctx=canvas.getContext('2d');
+  const SIZE=canvas.width,CX=SIZE/2,CY=SIZE/2,R=SIZE/2-5;
+  function draw(){
+    const now=new Date(),h=now.getHours()%12,m=now.getMinutes(),s=now.getSeconds(),ms=now.getMilliseconds();
+    ctx.clearRect(0,0,SIZE,SIZE);ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);ctx.fillStyle='#0d0d0d';ctx.fill();
+    for(let i=0;i<60;i++){const a=(i/60)*Math.PI*2-Math.PI/2,isH=i%5===0;ctx.beginPath();ctx.moveTo(CX+Math.cos(a)*(isH?R-10:R-5),CY+Math.sin(a)*(isH?R-10:R-5));ctx.lineTo(CX+Math.cos(a)*(R-1),CY+Math.sin(a)*(R-1));ctx.strokeStyle=isH?'#ffa116':'#2a2a2a';ctx.lineWidth=isH?2:1;ctx.stroke();}
+    function drawHand(angle,len,width,color){ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX+Math.cos(angle)*len,CY+Math.sin(angle)*len);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.stroke();}
+    drawHand(((h+m/60+s/3600)/12)*Math.PI*2-Math.PI/2,R*0.52,3,'#eff1f6');
+    drawHand(((m+s/60)/60)*Math.PI*2-Math.PI/2,R*0.73,2,'#eff1f6');
+    drawHand(((s+ms/1000)/60)*Math.PI*2-Math.PI/2,R*0.82,1,'#00c853');
+    ctx.beginPath();ctx.arc(CX,CY,4,0,Math.PI*2);ctx.fillStyle='#00c853';ctx.fill();
+    const pad=n=>String(n).padStart(2,'0');document.getElementById('clock-time-label').textContent=`${pad(now.getHours())}:${pad(m)}:${pad(s)}`;
   }
+  draw();setInterval(draw,1000/30);
+})();
 
-  // ── Click / Modal logic ──────────────────────────────────────
-  let pendingCell = null;
-  let pendingKey  = null;
+// ── Target Date Modal ─────────────────────────────────────────
+function toInputVal(d){ return dateKey(d); }
 
-  function attachClickHandler(cell, date) {
-    cell.addEventListener('click', () => {
-      if (isFutureDate(date)) return;
-      const key = dateKey(date);
-      if (litDays.has(key)) return; // Already lit, do nothing
+function updateTargetPreview(){
+  const sv=document.getElementById('target-start-input').value;
+  const ev=document.getElementById('target-end-input').value;
+  if(!sv||!ev){ document.getElementById('target-preview').innerHTML='Pick both dates to preview.'; return; }
+  const s=parseDateKey(sv),e=parseDateKey(ev);
+  if(e<=s){ document.getElementById('target-preview').innerHTML='<span style="color:var(--streak-color)">⚠ End date must be after start date.</span>'; return; }
+  const days=Math.floor((e-s)/86400000)+1;
+  document.getElementById('target-preview').innerHTML=
+    `<strong>${formatDisplay(s)}</strong> → <strong>${formatDisplay(e)}</strong><br>Window: <strong style="color:var(--green)">${days} days</strong> total`;
+}
 
-      pendingCell = cell;
-      pendingKey  = key;
+document.getElementById('edit-target-btn').addEventListener('click',openTargetModal);
+document.getElementById('change-dates-btn').addEventListener('click',openTargetModal);
 
-      const isToday = sameDay(date, today);
-      const isYesterday = sameDay(date, yesterday);
-      document.getElementById('modal-icon').textContent = isToday ? '🔆' : isYesterday ? '🌙' : '📅';
-      document.getElementById('modal-title').textContent = isToday ? 'Light up today?' : isYesterday ? 'Light up yesterday?' : 'Light up this day?';
-      document.getElementById('modal-date-label').textContent = date.toDateString();
-      document.getElementById('modal-overlay').classList.add('active');
-    });
-  }
+function openTargetModal(){
+  document.getElementById('target-start-input').value=toInputVal(RANGE_START);
+  document.getElementById('target-end-input').value=toInputVal(RANGE_END);
+  updateTargetPreview();
+  document.getElementById('target-date-overlay').classList.add('active');
+}
 
-  document.getElementById('btn-yes').addEventListener('click', () => {
-    if (pendingCell && pendingKey) {
-      pendingCell.classList.remove('is-today','is-yesterday');
-      pendingCell.classList.add('lit');
-      litDays.add(pendingKey);
-      saveLitDays(); // Persist to browser
-      updatePerformanceStats();
-      const cell = pendingCell;
-      const key  = pendingKey;
-      closeModal();
-      attachNoteHandler(cell, key);
-      openNotesModal(key, cell.dataset.date);
-      return;
-    }
-    closeModal();
-  });
+document.getElementById('target-start-input').addEventListener('input',updateTargetPreview);
+document.getElementById('target-end-input').addEventListener('input',updateTargetPreview);
 
-  document.getElementById('btn-no').addEventListener('click', closeModal);
+document.getElementById('target-save-btn').addEventListener('click',()=>{
+  const sv=document.getElementById('target-start-input').value;
+  const ev=document.getElementById('target-end-input').value;
+  if(!sv||!ev) return;
+  const s=parseDateKey(sv),e=parseDateKey(ev);
+  if(e<=s) return;
+  RANGE_START=s; RANGE_END=e;
+  saveTargetDates(s,e);
+  refreshHeader();
+  document.querySelector('.progress-bar-title').textContent=`TARGET PROGRESS — ${formatDisplay(s).toUpperCase()} → ${formatDisplay(e).toUpperCase()}`;
+  document.getElementById('target-date-overlay').classList.remove('active');
+  updateAll();
+});
 
-  document.getElementById('modal-overlay').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('modal-overlay')) closeModal();
-  });
+document.getElementById('target-cancel-btn').addEventListener('click',()=>document.getElementById('target-date-overlay').classList.remove('active'));
+document.getElementById('target-date-overlay').addEventListener('click',e=>{ if(e.target.id==='target-date-overlay') document.getElementById('target-date-overlay').classList.remove('active'); });
 
-  function closeModal() {
-    document.getElementById('modal-overlay').classList.remove('active');
-    pendingCell = null;
-    pendingKey  = null;
-  }
-
-  // ── Motivational quote ───────────────────────────────────────
-  const QUOTES = [
-    // ── General discipline ──
-    { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
-    { text: "Discipline is the bridge between goals and accomplishment.", author: "Jim Rohn" },
-    { text: "The secret of your future is hidden in your daily routine.", author: "Mike Murdock" },
-    { text: "Success is nothing more than a few simple disciplines, practiced every day.", author: "Jim Rohn" },
-    { text: "It's not what we do once in a while that shapes our lives, but what we do consistently.", author: "Tony Robbins" },
-    { text: "Small daily improvements over time lead to stunning results.", author: "Robin Sharma" },
-    { text: "Motivation gets you going. Discipline keeps you growing.", author: "John C. Maxwell" },
-    { text: "You don't rise to the level of your goals. You fall to the level of your systems.", author: "James Clear" },
-    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-    { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
-    { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
-    { text: "The difference between ordinary and extraordinary is that little extra.", author: "Jimmy Johnson" },
-    { text: "Your future is created by what you do today, not tomorrow.", author: "Robert T. Kiyosaki" },
-    { text: "The pain of discipline is far less than the pain of regret.", author: "Sarah Bombell" },
-    { text: "Champions aren't made in gyms. Champions are made from something they have deep inside them.", author: "Muhammad Ali" },
-    { text: "Either you run the day or the day runs you.", author: "Jim Rohn" },
-    { text: "A year from now you may wish you had started today.", author: "Karen Lamb" },
-    { text: "What you do today can improve all your tomorrows.", author: "Ralph Marston" },
-    { text: "The secret to getting ahead is getting started.", author: "Mark Twain" },
-    // ── Marcus Aurelius ──
-    { text: "You have power over your mind, not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius" },
-    { text: "The impediment to action advances action. What stands in the way becomes the way.", author: "Marcus Aurelius" },
-    { text: "Waste no more time arguing about what a good man should be. Be one.", author: "Marcus Aurelius" },
-    { text: "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.", author: "Marcus Aurelius" },
-    { text: "If it is not right, do not do it; if it is not true, do not say it.", author: "Marcus Aurelius" },
-    { text: "Do not indulge in dreams of what you do not have, but count the blessings you actually possess.", author: "Marcus Aurelius" },
-    { text: "Confine yourself to the present.", author: "Marcus Aurelius" },
-    { text: "The best revenge is to be unlike him who performed the injury.", author: "Marcus Aurelius" },
-    { text: "Accept the things to which fate binds you, and love the people with whom fate brings you together.", author: "Marcus Aurelius" },
-    { text: "How much more grievous are the consequences of anger than the causes of it.", author: "Marcus Aurelius" },
-    { text: "Never esteem anything as of advantage to you that will make you break your word or lose your self-respect.", author: "Marcus Aurelius" },
-    { text: "Begin at once to live, and count each separate day as a separate life.", author: "Marcus Aurelius" },
-    { text: "You could leave life right now. Let that determine what you do and say and think.", author: "Marcus Aurelius" },
-    { text: "Stop allowing your mind to be a slave, to be jerked about by selfish impulses, to kick against fate and the present, and to mistrust the future.", author: "Marcus Aurelius" },
-    { text: "Do every act of your life as though it were the very last act of your life.", author: "Marcus Aurelius" },
-    { text: "External things are not the problem. It is your assessment of them. Which you can erase right now.", author: "Marcus Aurelius" },
-    { text: "If you seek tranquility, do less. Or more accurately, do what is essential.", author: "Marcus Aurelius" },
-    // ── Epictetus ──
-    { text: "Make the best use of what is in your power, and take the rest as it happens.", author: "Epictetus" },
-    { text: "He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has.", author: "Epictetus" },
-    { text: "Men are disturbed not by things, but by the opinions about things.", author: "Epictetus" },
-    { text: "First say to yourself what you would be; and then do what you have to do.", author: "Epictetus" },
-    { text: "Seek not the good in external things; seek it in yourself.", author: "Epictetus" },
-    { text: "It is not what happens to you, but how you react to it that matters.", author: "Epictetus" },
-    { text: "No man is free who is not master of himself.", author: "Epictetus" },
-    { text: "Wealth consists not in having great possessions, but in having few wants.", author: "Epictetus" },
-    { text: "Don't explain your philosophy. Embody it.", author: "Epictetus" },
-    { text: "The key is to keep company only with people who uplift you, whose presence calls forth your best.", author: "Epictetus" },
-    { text: "If you want to improve, be content to be thought foolish and stupid.", author: "Epictetus" },
-    { text: "He who laughs at himself never runs out of things to laugh at.", author: "Epictetus" },
-    { text: "No great thing is created suddenly.", author: "Epictetus" },
-    { text: "How long are you going to wait before you demand the best of yourself?", author: "Epictetus" },
-    { text: "Difficulties show what men are.", author: "Epictetus" },
-    { text: "Freedom is the only worthy goal in life. It is won by disregarding things that lie beyond our control.", author: "Epictetus" },
-    // ── Seneca ──
-    { text: "Luck is what happens when preparation meets opportunity.", author: "Seneca" },
-    { text: "It is not that I'm so smart. It's just that I stay with problems longer.", author: "Seneca" },
-    { text: "We suffer more in imagination than in reality.", author: "Seneca" },
-    { text: "Dum differtur vita transcurrit. — While we are postponing, life speeds by.", author: "Seneca" },
-    { text: "The whole future lies in uncertainty: live immediately.", author: "Seneca" },
-    { text: "Omnia, Lucili, aliena sunt, tempus tantum nostrum est. — Everything is alien to us; time alone is ours.", author: "Seneca" },
-    { text: "It is not the man who has too little, but the man who craves more, that is poor.", author: "Seneca" },
-    { text: "Nusquam est qui ubique est. — One who is everywhere is nowhere.", author: "Seneca" },
-    { text: "Associate with those who will make a better man of you.", author: "Seneca" },
-    { text: "The mind that is anxious about future events is miserable.", author: "Seneca" },
-    { text: "Recede in te ipse — Retire into yourself as much as possible.", author: "Seneca" },
-    { text: "If you really want to escape the things that harass you, what you need is not to be in a different place but to be a different person.", author: "Seneca" },
-    { text: "It is the power of the mind to be unconquerable.", author: "Seneca" },
-    { text: "As long as you live, keep learning how to live.", author: "Seneca" },
-    { text: "Most powerful is he who has himself in his own power.", author: "Seneca" },
-    { text: "We are more often frightened than hurt; and we suffer more from imagination than from reality.", author: "Seneca" },
-    // ── Zeno & other Stoics ──
-    { text: "Man conquers the world by conquering himself.", author: "Zeno of Citium" },
-    { text: "The goal of life is living in agreement with nature.", author: "Zeno of Citium" },
-    { text: "Better to trip with the feet than with the tongue.", author: "Zeno of Citium" },
-    { text: "We have two ears and one mouth, so we should listen more than we say.", author: "Zeno of Citium" },
-    { text: "Cato used to say that wise men profit more from fools than fools from wise men.", author: "Cato the Elder" },
-    { text: "He who fears death will never do anything worthy of a man who is alive.", author: "Seneca the Elder" },
-    { text: "Fate leads the willing and drags along the reluctant.", author: "Cleanthes" },
-    { text: "We should always be asking ourselves: Is this something that is, or is not, in my control?", author: "Epictetus" },
-  ];
-
-  (function() {
-    const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-    document.getElementById('quote-text').textContent   = q.text;
-    document.getElementById('quote-author').textContent = '— ' + q.author;
-  })();
-
-  // ── Render ───────────────────────────────────────────────────
-  const wrapper = document.getElementById('months-wrapper');
-  updatePerformanceStats();
-  getMonthsInRange().forEach(({ year, month }) => {
-    wrapper.appendChild(buildMonth(year, month));
-  });
-  // ── Tooltip ──────────────────────────────────────────────────
-  const tooltip = document.getElementById('cell-tooltip');
-  const ttDate  = document.getElementById('tt-date');
-  const ttNote  = document.getElementById('tt-note');
-  const ttHint  = document.getElementById('tt-hint');
-
-  function showTooltip(cell, hintOverride) {
-    const key      = cell.dataset.key;
-    const dateStr  = cell.dataset.date || '';
-    const noteText = key && notes[key] ? notes[key] : '';
-
-    let hint = hintOverride;
-    if (hint === undefined) {
-      hint = noteText ? 'Click to edit note' : 'Click to add a note';
-    }
-
-    ttDate.textContent = dateStr;
-    ttNote.textContent = noteText;
-    ttNote.style.display = noteText ? 'block' : 'none';
-    ttHint.textContent = hint;
-    ttHint.style.display = hint ? 'block' : 'none';
-
-    positionTooltip(cell);
-    tooltip.classList.add('visible');
-  }
-
-  function positionTooltip(cell) {
-    const rect = cell.getBoundingClientRect();
-    const tw   = tooltip.offsetWidth  || 160;
-    const th   = tooltip.offsetHeight || 60;
-    let   left = rect.left + rect.width / 2 - tw / 2;
-    let   top  = rect.top  - th - 10;
-
-    // Keep inside viewport
-    left = Math.max(8, Math.min(left, window.innerWidth  - tw - 8));
-    top  = top < 8 ? rect.bottom + 10 : top;
-
-    tooltip.style.left = left + 'px';
-    tooltip.style.top  = top  + 'px';
-  }
-
-  function hideTooltip() {
-    tooltip.classList.remove('visible');
-  }
-
-  function attachTooltip(cell, hint) {
-    cell.addEventListener('mouseenter', () => showTooltip(cell, hint));
-    cell.addEventListener('mouseleave', hideTooltip);
-  }
-
-  // ── Analog Clock ─────────────────────────────────────────────
-  (function() {
-    const canvas = document.getElementById('analog-clock');
-    const ctx    = canvas.getContext('2d');
-    const SIZE   = canvas.width;
-    const CX     = SIZE / 2;
-    const CY     = SIZE / 2;
-    const R      = SIZE / 2 - 6;
-
-    function drawClock() {
-      const now = new Date();
-      const h   = now.getHours() % 12;
-      const m   = now.getMinutes();
-      const s   = now.getSeconds();
-      const ms  = now.getMilliseconds();
-
-      ctx.clearRect(0, 0, SIZE, SIZE);
-
-      // Face
-      ctx.beginPath();
-      ctx.arc(CX, CY, R, 0, Math.PI * 2);
-      ctx.fillStyle = '#111111';
-      ctx.fill();
-
-      // Tick marks
-      for (let i = 0; i < 60; i++) {
-        const angle  = (i / 60) * Math.PI * 2 - Math.PI / 2;
-        const isHour = i % 5 === 0;
-        const inner  = isHour ? R - 11 : R - 6;
-        ctx.beginPath();
-        ctx.moveTo(CX + Math.cos(angle) * inner, CY + Math.sin(angle) * inner);
-        ctx.lineTo(CX + Math.cos(angle) * (R - 1), CY + Math.sin(angle) * (R - 1));
-        ctx.strokeStyle = isHour ? '#ffa116' : '#3a3a3a';
-        ctx.lineWidth   = isHour ? 2 : 1;
-        ctx.stroke();
-      }
-
-      // Hour numbers (3, 6, 9, 12)
-      ctx.font = 'bold 9px DM Mono, monospace';
-      ctx.fillStyle  = '#6c6c6c';
-      ctx.textAlign  = 'center';
-      ctx.textBaseline = 'middle';
-      [[12,0],[ 3,90],[6,180],[9,270]].forEach(([n, deg]) => {
-        const a = (deg - 90) * Math.PI / 180;
-        ctx.fillText(n, CX + Math.cos(a) * (R - 18), CY + Math.sin(a) * (R - 18));
-      });
-
-      // Hour hand
-      const hAngle = ((h + m / 60 + s / 3600) / 12) * Math.PI * 2 - Math.PI / 2;
-      drawHand(hAngle, R * 0.52, 3.5, '#eff1f6');
-
-      // Minute hand
-      const mAngle = ((m + s / 60) / 60) * Math.PI * 2 - Math.PI / 2;
-      drawHand(mAngle, R * 0.73, 2.5, '#eff1f6');
-
-      // Second hand (smooth)
-      const sAngle = ((s + ms / 1000) / 60) * Math.PI * 2 - Math.PI / 2;
-      drawHand(sAngle, R * 0.82, 1, '#00c853');
-
-      // Center dot
-      ctx.beginPath();
-      ctx.arc(CX, CY, 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#00c853';
-      ctx.fill();
-
-      // Digital label
-      const pad = n => String(n).padStart(2, '0');
-      document.getElementById('clock-time-label').textContent =
-        `${pad(now.getHours())}:${pad(m)}:${pad(s)}`;
-    }
-
-    function drawHand(angle, length, width, color) {
-      ctx.beginPath();
-      ctx.moveTo(CX, CY);
-      ctx.lineTo(CX + Math.cos(angle) * length, CY + Math.sin(angle) * length);
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = width;
-      ctx.lineCap     = 'round';
-      ctx.stroke();
-    }
-
-    drawClock();
-    setInterval(drawClock, 1000 / 30); // ~30fps for smooth second hand
-  })();
+// ── Init ─────────────────────────────────────────────────────
+buildHabitTabs();
+updateAll();
 </script>
 </body>
 </html>
-
-
